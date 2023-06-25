@@ -3,23 +3,51 @@ import ItemForm from "./ItemForm";
 import Filter from "./Filter";
 import Item from "./Item";
 
-function ShoppingList({ items }) {
+function ShoppingList() {
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [items, setItems] = useState([
+    { id: 1, name: "Yogurt", category: "Dairy" },
+    { id: 2, name: "Pomegranate", category: "Produce" },
+    { id: 3, name: "Lettuce", category: "Produce" },
+    { id: 4, name: "String Cheese", category: "Dairy" },
+    { id: 5, name: "Swiss Cheese", category: "Dairy" },
+    { id: 6, name: "Cookies", category: "Dessert" },
+  ]);
 
-  function handleCategoryChange(event) {
+  const handleItemFormSubmit = (newItem) => {
+    setItems([...items, newItem]);
+  };
+
+  const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
-  }
+  };
 
   const itemsToDisplay = items.filter((item) => {
-    if (selectedCategory === "All") return true;
+    if (selectedCategory === "All" && searchTerm === "") return true;
 
-    return item.category === selectedCategory;
+    if (selectedCategory !== "All" && searchTerm !== "") {
+      return (
+        item.category === selectedCategory &&
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedCategory !== "All") {
+      return item.category === selectedCategory;
+    }
+
+    return item.name.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   return (
     <div className="ShoppingList">
-      <ItemForm />
-      <Filter onCategoryChange={handleCategoryChange} />
+      <ItemForm onItemFormSubmit={handleItemFormSubmit} />
+      <Filter
+        search={searchTerm}
+        onSearchChange={(event) => setSearchTerm(event.target.value)}
+        onCategoryChange={handleCategoryChange}
+      />
       <ul className="Items">
         {itemsToDisplay.map((item) => (
           <Item key={item.id} name={item.name} category={item.category} />
